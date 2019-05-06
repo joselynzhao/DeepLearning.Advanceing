@@ -30,9 +30,6 @@ if __name__  =="__main__":
     x = np.linspace(float(-b/a),(2*math.pi-b)/a,N).reshape([-1,1])
     y = np.cos(a*x+b).reshape([-1,1])
 
-    # plt.plot(x,y)
-    # plt.show(-
-
 
     data = tf.placeholder(tf.float32,[None,1])
     label = tf.placeholder(tf.float32,[None,1])

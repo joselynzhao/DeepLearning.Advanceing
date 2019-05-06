@@ -20,18 +20,10 @@ if  __name__ == "__main__":
     data = tf.placeholder(tf.float32, [None, 1])
     label = tf.placeholder(tf.float32, [None, 1])
 
-    print(tf.shape(data))
-    print(tf.shape(label))
-    # print(tf.shape(data))
-
-    w1 = tf.Variable(tf.random_normal([1, 1]), dtype=tf.float32, name='s_w1')
-    w2 = tf.Variable(tf.random_normal([1, 1]), dtype=tf.float32, name='s_w2')
-    w3 = tf.Variable(tf.random_normal([1, 1]), dtype=tf.float32, name='s_w3')
-    b = tf.Variable(tf.random_normal([1, 1]), dtype=tf.float32, name='s_b')
-
-    # y_label = tf.add(tf.add(tf.matmul(data, w1), tf.matmul((data**2), w2)), tf.add(tf.matmul((data**3), w3), b))
-    # loss = tf.reduce_mean(tf.square(label - y_label))
-    # train = tf.train.AdamOptimizer(0.2).minimize(loss)
+    w1 = tf.Variable(tf.random_normal([1, 1], mean=0, stddev=200), dtype=tf.float32, name='s_w1')
+    w2 = tf.Variable(tf.random_normal([1, 1], mean=100, stddev=200), dtype=tf.float32, name='s_w2')
+    w3 = tf.Variable(tf.random_normal([1, 1], mean=200, stddev=200), dtype=tf.float32, name='s_w3')
+    b = tf.Variable(tf.random_normal([1, 1], mean=200, stddev=100), dtype=tf.float32, name='s_b')
 
     saver = tf.train.Saver()
     with tf.Session() as sess:
@@ -46,8 +38,8 @@ if  __name__ == "__main__":
         b = b.eval()
 
     school_number = 18023032
-    aa = 18
-    bb = 32
+    aa = 18.0
+    bb = 32.0
     N = 2000
     x1 = np.linspace(-bb/aa,(2*math.pi-bb)/aa,N)
     y1 = np.cos(aa * x1 + bb)
@@ -56,6 +48,7 @@ if  __name__ == "__main__":
     plt.plot(x1,y1,'r')
     plt.plot(x1,y2,'g')
     plt.title("ckpt_load")
+    plt.savefig('./save/ckpt.png')
     plt.show()
 
 

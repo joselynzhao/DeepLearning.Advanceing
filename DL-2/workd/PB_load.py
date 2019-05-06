@@ -47,8 +47,8 @@ if __name__ =="__main__":
     y1 = np.cos(aa * x1 + bb)
     y2 = x1 * w1 + (x1 ** 2) * w2 + (x1 ** 3) * w3 + b
     y2 = np.reshape(y2, [-1, 1])
-
     plt.plot(x1, y1, 'r')
     plt.plot(x1, y2, 'g')
     plt.title("PB_load")
+    plt.savefig('./save/PB.png')
     plt.show()
