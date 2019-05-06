@@ -49,7 +49,7 @@ if __name__  =="__main__":
     # 300 200 100 50 0.34995785
     # 500 100 50 100 0.33685145
 
-    y_label = tf.add(tf.add(tf.matmul(data,w1),tf.matmul((data**2),w2)),tf.add(tf.matmul((data**3),w3),b))
+    y_label = tf.add(tf.add(tf.matmul(data,w1),tf.matmul((data**2),w2)),tf.add(tf.matmul((data**3),w3),b),name ='op-to-store')
     loss = tf.reduce_mean(tf.square(label - y_label))
     train = tf.train.AdamOptimizer(0.2).minimize(loss)
     # train = tf.train.GradientDescentOptimizer(0.1).minimize(loss)
@@ -74,7 +74,7 @@ if __name__  =="__main__":
         save_path1 = saver.save(sess,save_path_ckpt)
 
         # pb保存
-        constant_graph = graph_util.convert_variables_to_constants(sess, sess.graph_def, ['s_w1','s_w2','s_w3','s_b'])
+        constant_graph = graph_util.convert_variables_to_constants(sess, sess.graph_def, ['op-to-store'])
         with tf.gfile.FastGFile(save_path_pb, mode='wb') as f:
             f.write(constant_graph.SerializeToString())
 
