@@ -26,20 +26,9 @@ if __name__  =="__main__":
     school_number = 18023032
     a =18
     b =32
-    x = np.linspace(0.,2*math.pi,2000).reshape([-1,1])
+    N = 2000
+    x = np.linspace(-b/a,(2*math.pi-b)/a,N).reshape([-1,1])
     y = np.cos(a*x+b).reshape([-1,1])
-    # print(x)
-    # print(y)
-    # print(tf.shape(x))
-    # np.reshape(x,[1,2000])
-    # np.reshape(y,[1,2000])
-    # print(tf.shape(x))
-    # print(np.shape(y))
-    # tf.reshape(y,[1,2000])
-
-    # plt.title("test")
-    # plt.plot(x,y)
-    # plt.show()
 
 
     data = tf.placeholder(tf.float32,[None,1])
@@ -47,40 +36,39 @@ if __name__  =="__main__":
 
     print(tf.shape(data))
     print(tf.shape(label))
-    # tf.reshape(data,[2000,1])
     # print(tf.shape(data))
 
+    w1 = tf.Variable(tf.random_normal([1,1]), dtype=tf.float32, name='s_w1')
+    w2 = tf.Variable(tf.random_normal([1,1]), dtype=tf.float32, name='s_w2')
+    w3 = tf.Variable(tf.random_normal([1,1]), dtype=tf.float32, name='s_w3')
+    b = tf.Variable(tf.random_normal([1,1]), dtype=tf.float32, name='s_b')
 
-    w1 = tf.Variable(tf.random_normal([1]),dtype=tf.float32,name='op_to_store')
-    w2 = tf.Variable(tf.random_normal([1]),dtype=tf.float32,name='op_to_store')
-    w3 = tf.Variable(tf.random_normal([1]),dtype=tf.float32,name='op_to_store')
-    b = tf.Variable(tf.random_normal([1]),dtype=tf.float32,name='op_to_store')
-
-    y_label = tf.add(tf.add(data*w1,(data**2)*w2),tf.add((data**3)*w3,b))
-    # y_label = tf.add(tf.add(tf.matmul(data,w1),tf.matmul(data**2,w2)),tf.add(tf.matmul(data**3,w3),b))
+    y_label = tf.add(tf.add(tf.matmul(data,w1),tf.matmul((data**2),w2)),tf.add(tf.matmul((data**3),w3),b))
     loss = tf.reduce_mean(tf.square(label - y_label))
-    train = tf.train.GradientDescentOptimizer(0.0001).minimize(loss)
-
+    train = tf.train.AdamOptimizer(0.2).minimize(loss)
+    # train = tf.train.GradientDescentOptimizer(0.2).minimize(loss)
+    # train = tf.train.AdadeltaOptimizer(0.1).minimize(loss)
+    # train = tf.train.AdagradOptimizer(0.1).minimize(loss)
+    # train = tf.train.FtrlOptimizer(0.01).minimize(loss)
     saver = tf.train.Saver()
+
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
-        # sess.run(x)
-        # sess.run(y)
-        # sess.run(tf.reshape(x,[2000,1]))
-        # sess.run(tf.reshape(y,[2000,1]))
-        # print(x)
-        # print(y)
-        for i in range(300000):
+        for i in range(30000):
             sess.run(train, feed_dict={data:x,label:y})
-            if i% 100 == 1:
-                print(sess.run(loss,feed_dict={data:x,label:y}))
+            if i % 500 == 1:
+                log_loss = sess.run(loss,feed_dict={data:x,label:y})
+                print(i,log_loss)
         print(sess.run(w1))
         print(sess.run(w2))
         print(sess.run(w3))
         print(sess.run(b))
+
+        # ckpt 保存
         save_path1 = saver.save(sess,save_path_ckpt)
 
-        constant_graph = graph_util.convert_variables_to_constants(sess, sess.graph_def, ['op_to_store'])
+        # pb保存
+        constant_graph = graph_util.convert_variables_to_constants(sess, sess.graph_def, ['s_w1','s_w2','s_w3','s_b'])
         with tf.gfile.FastGFile(save_path_pb, mode='wb') as f:
             f.write(constant_graph.SerializeToString())
 
