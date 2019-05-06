@@ -29,9 +29,9 @@ if  __name__ == "__main__":
     w3 = tf.Variable(tf.random_normal([1, 1]), dtype=tf.float32, name='s_w3')
     b = tf.Variable(tf.random_normal([1, 1]), dtype=tf.float32, name='s_b')
 
-    y_label = tf.add(tf.add(tf.matmul(data, w1), tf.matmul((data ** 2), w2)), tf.add(tf.matmul((data ** 3), w3), b))
-    loss = tf.reduce_mean(tf.square(label - y_label))
-    train = tf.train.AdamOptimizer(0.2).minimize(loss)
+    # y_label = tf.add(tf.add(tf.matmul(data, w1), tf.matmul((data**2), w2)), tf.add(tf.matmul((data**3), w3), b))
+    # loss = tf.reduce_mean(tf.square(label - y_label))
+    # train = tf.train.AdamOptimizer(0.2).minimize(loss)
 
     saver = tf.train.Saver()
     with tf.Session() as sess:
@@ -52,6 +52,10 @@ if  __name__ == "__main__":
     x1 = np.linspace(-bb/aa,(2*math.pi-bb)/aa,N)
     y1 = np.cos(aa * x1 + bb)
     y2 = x1*w1+(x1**2)*w2+(x1**3)*w3+b
+    y2 = np.reshape(y2,[-1,1])
+    print(x1.shape)
+    print(y1.shape)
+    print(y2.shape)
     plt.plot(x1,y1,'r')
     plt.plot(x1,y2,'g')
     plt.title("test")

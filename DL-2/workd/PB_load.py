@@ -40,14 +40,17 @@ if __name__ =="__main__":
         b = b.eval()
 
     school_number = 18023032
-    aa = 18
-    bb = 32
+    aa = 18.0
+    bb = 32.0
     N = 2000
     x1 = np.linspace(-bb / aa, (2 * math.pi - bb) / aa, N)
-    x2 = np.linspace(-bb / aa, (2 * math.pi - bb) / aa, N)
     y1 = np.cos(aa * x1 + bb)
-    y2 = x2 * w1 + (x2 ** 2) * w2 + (x2 ** 3) * w3 + b
+    y2 = x1 * w1 + (x1 ** 2) * w2 + (x1 ** 3) * w3 + b
+    y2 = np.reshape(y2, [-1, 1])
+    print(x1.shape)
+    print(y1.shape)
+    print(y2.shape)
     plt.plot(x1, y1, 'r')
-    plt.plot(x2, y2, 'g')
+    plt.plot(x1, y2, 'g')
     plt.title("test")
     plt.show()
