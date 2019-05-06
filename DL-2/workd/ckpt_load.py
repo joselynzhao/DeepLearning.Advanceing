@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 '''
-@AUTHOR:Joselyn
+@AUTHOR:Joselyn Zhao
 @CONTACT:zhaojing17@foxmail.com
 @SOFTWERE:PyCharm
 @FILE:ckpt_load.py
@@ -53,12 +53,9 @@ if  __name__ == "__main__":
     y1 = np.cos(aa * x1 + bb)
     y2 = x1*w1+(x1**2)*w2+(x1**3)*w3+b
     y2 = np.reshape(y2,[-1,1])
-    print(x1.shape)
-    print(y1.shape)
-    print(y2.shape)
     plt.plot(x1,y1,'r')
     plt.plot(x1,y2,'g')
-    plt.title("test")
+    plt.title("ckpt_load")
     plt.show()
 
 

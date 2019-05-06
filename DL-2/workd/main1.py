@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 '''
-@AUTHOR:Joselyn
+@AUTHOR:Joselyn Zhao
 @CONTACT:zhaojing17@foxmail.com
 @SOFTWERE:PyCharm
 @FILE:main1.py
