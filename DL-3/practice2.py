@@ -15,4 +15,4 @@ import  tensorflow as tf
 if __name__ =="__main__":
     with tf.name_scope('name_sp1') as scp1:
         with tf.variable_scope('var_scp2') as scp2:
-            with
+            with 
