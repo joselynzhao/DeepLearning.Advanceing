@@ -31,9 +31,8 @@ if __name__ =="__main__":
 
     X_in = 1.2
     with tf.Session() as sess:
-        sess.run(tf.global_variables_initializer
-                 ())
-    ar = sess.run(a, feed_dict={X:X_in})
-    br = sess.run(b, feed_dict={X:X_in})
-    print("ar=", ar)
-    print("br=", br)
+        sess.run(tf.global_variables_initializer())
+        ar = sess.run(a, feed_dict={X:X_in})
+        br = sess.run(b, feed_dict={X:X_in})
+        print("ar=", ar)
+        print("br=", br)
