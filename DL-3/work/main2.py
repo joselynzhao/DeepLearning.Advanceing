@@ -21,7 +21,7 @@ from tensorflow.examples.tutorials.mnist import input_data
 
 if __name__ =="__main__":
 
-    mnist = input_data.read_data_sets('./data/mnist', one_hot=True)
+    mnist = input_data.read_data_sets('../../../data/mnist', one_hot=True)
     tf.logging.set_verbosity(old_v)
     def X_W(x,reuse=False):
         with tf.variable_scope("X_W") as scope:

@@ -11,8 +11,7 @@
 '''
 
 import tensorflow as tf
-from example_jicheng import * 
-
+from example_jicheng import *
 
 
 class Lenet(Network):
