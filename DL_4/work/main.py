@@ -26,22 +26,32 @@ from lenet import  *
 
 if __name__ =="__main__":
     mnist = input_data.read_data_sets('../../../data/mnist', one_hot=True)
-    # X_train = np.pad(mnist.train.images, ((0, 0), (2, 2), (2, 2), (0, 0)), 'constant')
-    # X_validation = np.pad(mnist.validation.images, ((0, 0), (2, 2), (2, 2), (0, 0)), 'constant')
-    # X_test = np.pad(mnist.test.images, ((0, 0), (2, 2), (2, 2), (0, 0)), 'constant')
+    x_train = np.reshape(mnist.train.images,[-1,28,28,1])
+    x_test = np.reshape(mnist.test.images,[-1,28,28,1])
+
+    x_train = np.pad(x_train, ((0, 0), (2, 2), (2, 2), (0, 0)), 'constant')
+    # x_validation = np.pad(mnist.validation.images, ((0, 0), (2, 2), (2, 2), (0, 0)), 'constant')
+    x_test = np.pad(x_test, ((0, 0), (2, 2), (2, 2), (0, 0)), 'constant')
     # print("Updated Image Shape: {}".format(X_train[0].shape))
-    # X_train, y_train = shuffle(X_train, mnist.train.labels)
+    x_train, y_train = shuffle(x_train, mnist.train.labels)
+
     tf.logging.set_verbosity(old_v)
-    mylenet = Lenet(0, 0.1, 0.01)
     iteratons = 30000
     batch_size = 64
+    ma = 0
+    sigma = 0.1
+    lr = 0.01
+    mylenet = Lenet(ma,sigma,lr)
 
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
         for ii in range(iteratons):
             batch_xs,batch_ys = mnist.train.next_batch(batch_size)
-            batch_xs = np.pad(batch_xs,((0, 0), (2, 2), (2, 2), (0, 0)), 'constant')
-            x_test = np.pad(mnist.test.images, ((0, 0), (2, 2), (2, 2), (0, 0)), 'constant')
+            # batch_xs = np.reshape(batch_xs,[-1,28,28,1])
+            # batch_xs = np.pad(batch_xs,((0, 0), (2, 2), (2, 2), (0, 0)), 'constant')
+            # x_test = np.reshape(mnist.test., [-1, 28, 28, 1])
+            # x_test = np.pad(mnist.test.images, ((0, 0), (2, 2), (2, 2), (0, 0)), 'constant')
+
             sess.run(mylenet.train_step,feed_dict ={mylenet.x:batch_xs,mylenet.y:batch_ys})
             if ii % 500 == 1:
                 acc = sess.run(mylenet.accuracy,feed_dict ={mylenet.x:x_test,mylenet.y:mnist.test.labels})
