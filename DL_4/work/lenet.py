@@ -14,7 +14,6 @@ import  tensorflow as tf
 
 class Lenet():
     def __init__(self,mu,sigma,lr=0.02):
-        # self.sess = sess
         self.mu = mu
         self.sigma = sigma
         self.lr = lr
@@ -67,7 +66,7 @@ class Lenet():
             self.y = self._fully_connected_layer("fc3","wfc3","bfc3",self.fc2,[84,10])
 
     def _flatten(self,conv):
-        conv1 = tf.reshape(conv, [1, -1])
+        conv1 = tf.reshape(conv, [-1, 400])
         return conv1
 
     def _compute_loss_graph(self):
