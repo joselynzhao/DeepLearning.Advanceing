@@ -55,7 +55,6 @@ class FC_MNIST():
         self.iterations = iterations
         self.lr = lr
         self.batch_size = batch_size
-
         # 初始化绘制器
         self.gd = gif_drawer()
         # 建立模型

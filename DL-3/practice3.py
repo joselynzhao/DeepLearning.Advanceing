@@ -23,3 +23,5 @@ def rnn(inputs,state,hidden_size):
     output = tf.nn.tanh(out_linear)
     return output
 
+
+

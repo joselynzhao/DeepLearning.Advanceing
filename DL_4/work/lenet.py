@@ -13,7 +13,8 @@
 import  tensorflow as tf
 
 class Lenet():
-    def __init__(self,mu,sigma,lr):
+    def __init__(self,mu,sigma,lr=0.02):
+        # self.sess = sess
         self.mu = mu
         self.sigma = sigma
         self.lr = lr
@@ -28,8 +29,9 @@ class Lenet():
         self._create_train_op_graph()
 
     def _setup_placeholders_graph(self):
-        self.x = tf.placeholder("float",shape=[None,32,32,1],name='x')
-        self.y_ = tf.pleceholder("float",shape = [None,10],name ="y_") #y_ 的shape 为什么不是10* 10
+        self.x  = tf.placeholder("float",shape=[None,32,32,1],name='x')
+        self.y_ = tf.placeholder("float",shape = [None,10],name ="y_")
+        #y_ 的shape 为什么不是10* 10
 
     def _cnn_layer(self,scope_name,W_name,b_name,x,filter_shape,conv_stride,padding_tag="VALID"):
         with tf.variable_scope(scope_name):
@@ -70,7 +72,7 @@ class Lenet():
 
     def _compute_loss_graph(self):
         with tf.name_scope("loss_function"):
-            loss = tf.nn.softmax_cross_entropy_with_logits(lables = self.y_,logits = self.y)
+            loss = tf.nn.softmax_cross_entropy_with_logits(labels = self.y_,logits = self.y)
             self.loss = tf.reduce_mean(loss)
 
     def _compute_acc_graph(self):
