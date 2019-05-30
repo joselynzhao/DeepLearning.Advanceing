@@ -16,8 +16,8 @@ import  tensorflow as tf
 def lenet(image):
     with slim.arg_scope([slim.conv2d, slim.fully_connected],
                         activation_fn=tf.nn.relu,
-                        weights_initializer=tf.truncated_normal_initializer(0.0,0.1),
-                        weights_regularizer=slim.l2_regularizer(0.0005)):
+                        weights_initializer=tf.truncated_normal_initializer(0.0,0.1), #mu，sigma
+                        weights_regularizer=slim.l2_regularizer(0.1)):
         net = slim.conv2d(image, 6, [5, 5], stride=1, padding="VALID", scope="conv1")
         net = slim.max_pool2d(net, [2, 2], stride=2, padding="VALID", scope="pool1")
         net = slim.conv2d(net,16,[5,5],stride=1,padding = "VALID",scope ="conv2")
