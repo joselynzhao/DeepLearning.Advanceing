@@ -23,11 +23,9 @@ if __name__ =="__main__":
 
     mnist = input_data.read_data_sets('../../../data/mnist', one_hot=True)
     tf.logging.set_verbosity(old_v)
-    def X_W(x,reuse=False):
-        with tf.variable_scope("X_W") as scope:
-            if reuse:
-                scope.reuse_variables()
-            W = tf.Variable(tf.zeros([392,10]),name='w')
+    def X_W(x):
+        with tf.variable_scope("X_W",reuse = tf.AUTO_REUSE):
+            W = tf.get_variable("w",[392,10])
             y = tf.matmul(x,W)
             return W,y
 
@@ -38,7 +36,7 @@ if __name__ =="__main__":
     # w = tf.Variable(tf.zeros([784,10]))
     b = tf.Variable(tf.zeros([10]))
     _,y1 = X_W(input1)
-    weight,y2 = X_W(input2,True)
+    weight,y2 = X_W(input2)
     y = tf.nn.softmax(y1+y2+b)
     y_ = tf.placeholder(dtype='float',shape=[None,10])
 
