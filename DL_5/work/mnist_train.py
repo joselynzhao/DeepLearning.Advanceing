@@ -21,7 +21,7 @@ if __name__ =="__main__":
     x_test = np.reshape(mnist.test.images, [-1, 28, 28, 1])
     x_test = np.pad(x_test, ((0, 0), (2, 2), (2, 2), (0, 0)),'constant')  # print("Updated Image Shape: {}".format(X_train[0].shape))
 
-    iteratons = 20000
+    iteratons = 10000
     batch_size = 64
     lr = 0.1
 
