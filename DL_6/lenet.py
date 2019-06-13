@@ -36,6 +36,7 @@ class Lenet():
         with tf.variable_scope(scope_name):
             conv_W = tf.Variable(tf.truncated_normal(shape=filter_shape, mean=self.mu, stddev=self.sigma), name=W_name)
             conv_b = tf.Variable(tf.zeros(filter_shape[3]),name=b_name)
+            # conv_b = tf.Variable(tf.constant(0.1,shape=filter_shape[3]),name=b_name)
             conv = tf.nn.conv2d(x, conv_W, strides=conv_stride, padding=padding_tag) + conv_b
             tf.summary.histogram("weights",conv_W)
             tf.summary.histogram("biases",conv_b)
@@ -77,6 +78,8 @@ class Lenet():
             tf.summary.histogram("activations",act4)
             self.fc2 = act4
             self.y = self._fully_connected_layer("fc3","wfc3","bfc3",self.fc2,[84,10])
+            # self.y = tf.nn.softmax(self.fc3)
+            tf.summary.histogram("ypredict",self.y)
 
     def _flatten(self,conv):
         conv1 = tf.reshape(conv, [-1, 400])

@@ -41,7 +41,7 @@ if __name__ =="__main__":
 
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
-
+        tf.summary.image("input",mylenet.x,3)
         merged_summary = tf.summary.merge_all()
         writer = tf.summary.FileWriter("LOGDIR/",sess.graph)
         # writer.add_graph(sess.graph)
@@ -56,6 +56,7 @@ if __name__ =="__main__":
                 acc,s = sess.run([mylenet.accuracy,merged_summary],feed_dict ={mylenet.x:x_test,mylenet.y_:mnist.test.labels})
                 writer.add_summary(s,ii)
                 print("%5d: accuracy is: %4f" % (ii, acc))
+
 
         print('[accuracy,loss]:', sess.run([mylenet.accuracy], feed_dict={mylenet.x:x_test,mylenet.y_:mnist.test.labels}))
 
