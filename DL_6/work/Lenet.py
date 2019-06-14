@@ -48,10 +48,6 @@ class Lenet():
         self.activation = act  # 默认是relu
         self._build_graph()
 
-    def change_act(self,act):
-        self.activation = act
-
-
     def _build_graph(self,network_name = "Lenet"):
         self._setup_placeholders_graph()
         self._build_network_graph(network_name)
@@ -68,10 +64,7 @@ class Lenet():
             if reuse:
                 scope.reuse_variables()
             conv_W = tf.Variable(tf.truncated_normal(shape=filter_shape, mean=self.mu, stddev=self.sigma), name=W_name)
-            # self.variable_summaries(conv_W)  #可视化
             conv_b = tf.Variable(tf.zeros(filter_shape[3]),name=b_name)
-            # self.variable_summaries(conv_b)  #可视化
-            # conv_b = tf.Variable(tf.constant(0.1,shape=filter_shape[3]),name=b_name)
             conv = tf.nn.conv2d(x, conv_W, strides=conv_stride, padding=padding_tag) + conv_b
             tf.summary.histogram("weights",conv_W)
             tf.summary.histogram("biases",conv_b)
@@ -98,7 +91,7 @@ class Lenet():
 
             return fc
 
-    def _build_network_graph(self,scope_name):
+    def _build_network_graph(self,scope_name="Lenet"):
         with tf.variable_scope(scope_name):
             conv1 =self._cnn_layer("conv1","w1","b1",self.x,[5,5,1,6],[1, 1, 1, 1])
             self.conv1 = self._activation_way(conv1)
@@ -151,12 +144,10 @@ class Lenet():
 
     def _conv_visual(self,conv,conv_W, filter_shape):
         with tf.name_scope('visual'):
-            # scale weights to [0 1], type is still float
-            x_min = tf.reduce_min(conv_W)
+            x_min = tf.reduce_min(conv_W)  #不清楚这个是什么意思
             x_max = tf.reduce_max(conv_W)
             kernel_0_to_1 = (conv_W - x_min) / (x_max - x_min)
-            # to tf.image_summary format [batch_size, height, width, channels]
-            # this will display random 3 filters from the 64 in conv1
+
             kernel_transposed = tf.transpose(kernel_0_to_1, [3, 2, 0, 1])
             conv_W_img = tf.reshape(kernel_transposed, [-1, filter_shape[0], filter_shape[1], 1])
             tf.summary.image('conv_w', conv_W_img, max_outputs=filter_shape[3])
@@ -169,6 +160,7 @@ class Lenet():
             x_min = tf.reduce_min(fc_W)
             x_max = tf.reduce_max(fc_W)
             kernel_0_to_1 = (fc_W - x_min) / (x_max - x_min)
+
             fc_W_img = tf.reshape(kernel_0_to_1, [-1, W_shape[0], W_shape[1], 1])
             tf.summary.image('fc_w', fc_W_img, max_outputs=1)
 
