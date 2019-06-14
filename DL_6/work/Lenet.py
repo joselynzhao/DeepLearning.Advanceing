@@ -14,32 +14,6 @@
 import  tensorflow as tf
 
 
-def conv_image_visual(conv_image, image_weight, image_height, cy, cx, channels):
-    # slice off one image ande remove the image dimension
-    # original image is a 4d tensor[batche_size,weight,height,channels]
-    conv_image = tf.slice(conv_image, (0, 0, 0, 0), (1, -1, -1, -1))
-    conv_image = tf.reshape(conv_image, (image_height, image_weight, channels))
-    # add a couple of pixels of zero padding around the image
-    image_weight += 4
-    image_height += 4
-    conv_image = tf.image.resize_image_with_crop_or_pad(conv_image, image_height, image_weight)
-    conv_image = tf.reshape(conv_image, (image_height, image_weight, cy, cx))
-    conv_image = tf.transpose(conv_image, (2, 0, 3, 1))
-    conv_image = tf.reshape(conv_image, (1, cy * image_height, cx * image_weight, 1))
-    return conv_image
-
-
-def variable_summaries(var,name):
-    with tf.name_scope('summaries'):
-        mean = tf.reduce_mean(var)
-        tf.summary.scalar('mean/'+name,mean)
-        with tf.name_scope('stddev'):
-            stddev = tf.sqrt(tf.reduce_mean(tf.square(var-mean)))
-        tf.summary.scalar('stddev/'+name,stddev)
-        tf.summary.histogram(name,var)
-
-
-
 class Lenet():
     def __init__(self,mu,sigma,lr=0.02,act = 'relu'):
         self.mu = mu

@@ -18,6 +18,7 @@ old_v = tf.logging.get_verbosity()
 tf.logging.set_verbosity(tf.logging.ERROR)
 from tensorflow.examples.tutorials.mnist import input_data
 from Lenet import  *
+from PIL import Image
 
 mnist = input_data.read_data_sets('../../../data/mnist', one_hot=True)
 x_test = np.reshape(mnist.test.images, [-1, 28, 28, 1])
@@ -26,7 +27,7 @@ x_test = np.pad(x_test, ((0, 0), (2, 2), (2, 2), (0, 0)),
 tf.logging.set_verbosity(old_v)
 
 
-iteratons = 2000
+iteratons = 1000
 batch_size = 64
 ma = 0
 sigma = 0.1
@@ -68,7 +69,10 @@ def train_lenet(lenet):
         sample100_x,sample100_y = get_sample100(4) #随便选了一个label 输入0-9的值
         sample100_x = np.reshape(sample100_x,[-1,28,28,1])
         sample100_x = np.pad(sample100_x, ((0, 0), (2, 2), (2, 2), (0, 0)), 'constant')
-        fc2 = sess.run(lenet.fc2,feed_dict={lenet.x:sample100_x,lenet.y_:sample100_y})
+        x_min = tf.reduce_min(lenet.fc2)
+        x_max = tf.reduce_max(lenet.fc2)
+        fc2 = (lenet.fc2 - x_min) / (x_max - x_min)
+        fc2 = sess.run(fc2,feed_dict={lenet.x:sample100_x,lenet.y_:sample100_y})
         plt.imshow(fc2)
         plt.show()
 
