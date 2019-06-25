@@ -57,6 +57,8 @@ def pre_data(images,labels,size):
             if isbreak:
                 break
             for k in range(len_i): # 对这个数字对应的样本进行二重遍历
+                if j==k :
+                    continue
                 image1.append(from_0_to_9[i][j])
                 image2.append(from_0_to_9[i][k])
                 label.append([0])
@@ -113,7 +115,7 @@ def model():
     Q = tf.constant([5.0])
     thresh = 1.50  # 用于判断的距离阈值
     iterations = 20000
-    lr = 0.05
+    lr = 0.1
     batch_size = 900
 
     x1 = tf.placeholder(tf.float32, [None, 784], name="x1")
