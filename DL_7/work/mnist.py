@@ -49,6 +49,7 @@ def pre_data(images,labels,size):
 
     '''下面考虑正例，每个数字占（size/2）的1/10'''
     num_each_right = size/2/10  #每个数字创造的样本数
+    num_each_nega = size / 2 / 45
     for i in range(10):  #对每个数字做遍历
         isbreak = 0
         count =0 #当前样本数为0
@@ -69,10 +70,10 @@ def pre_data(images,labels,size):
                     break
                     #跳出两层for循环
     # print(count_list_right)
-    # print(len(count_list_right))
+    # print(len(count_list_right),len(count_list_right)*num_each_right)
     # {'9,9': 5, '7,7': 5, '4,4': 5, '0,0': 5, '3,3': 5, '8,8': 5, '5,5': 5, '1,1': 5, '6,6': 5, '2,2': 5}
     '''下面考虑负样本'''
-    num_each_nega = size/2/45
+
     for i in range(10): # 对0-9遍历
         for j in range(i+1,10): #仍对0-9遍历
             for count in range(num_each_nega): #构造这num_each_nega多个样本数据
@@ -82,7 +83,7 @@ def pre_data(images,labels,size):
             count_list_nega["%d,%d"%(i,j)]=num_each_nega
 
     # print(count_list_nega)
-    # print(len(count_list_nega))
+    # print(len(count_list_nega), len(count_list_nega)*num_each_nega)
 
     '''组合数据'''
     data = []
@@ -100,6 +101,8 @@ def fully_connected_layer(scope_name,x,W_name,b_name,W_shape,reuse = False):
             scope.reuse_variables()
         fc_W = tf.get_variable(W_name, initializer=tf.truncated_normal(W_shape, stddev=0.1))
         fc_b = tf.get_variable(b_name, initializer=tf.zeros(W_shape[1]))
+        tf.summary.histogram("weights", fc_W)
+        tf.summary.histogram("biases", fc_b)
         fc = tf.matmul(x, fc_W) + fc_b
         return fc
 
@@ -113,9 +116,9 @@ def net(x,scope_name='net'):
 
 def model():
     Q = tf.constant([5.0])
-    thresh = 1.50  # 用于判断的距离阈值
-    iterations = 20000
-    lr = 0.1
+    thresh = 1.7  # 用于判断的距离阈值
+    iterations = 1000
+    lr = 0.02
     batch_size = 900
 
     x1 = tf.placeholder(tf.float32, [None, 784], name="x1")
@@ -124,15 +127,23 @@ def model():
     # y2 = tf.placeholder(tf.float32, [None, 10], name="y2")
     net1 = net(x1)
     net2 = net(x2)
+    # tf.summary.histogram("net1", net1)
+    # tf.summary.histogram("net2", net2)
     Ew = tf.sqrt(tf.reduce_sum(tf.square(net1 - net2), 1))  #我可以把它理解为计算结果么？
+    tf.summary.histogram("Ew", Ew)
     L1 = 2 * (1 - y) * tf.square(Ew) / Q
     L2 = 2 * y * tf.exp(-2.77 * Ew / Q) * Q
+    tf.summary.histogram("L1", L1)
+    tf.summary.histogram("L2", L2)
     Loss = tf.reduce_mean(L1 + L2)
+    tf.summary.scalar("loss",Loss)
 
     prediction = tf.greater(Ew, thresh)  #这个函数又是个什么鬼啊
+    tf.summary.histogram("prediction", tf.cast(prediction,tf.int32))
     # 定义准确率
     correct_prediction = tf.equal(prediction, tf.cast(y, tf.bool))
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+    tf.summary.scalar("accuracy", accuracy)
 
     # 采用Adam作为优化器
     train_step = tf.train.GradientDescentOptimizer(lr).minimize(Loss)
@@ -148,12 +159,17 @@ def model():
 
     with tf.Session() as sess:  #这个session需要关闭么？
         sess.run(tf.global_variables_initializer())
+        # tf.summary.image("input", lenet.x, 3)
+        merged_summary = tf.summary.merge_all()
+        writer = tf.summary.FileWriter("LOGDIR/", sess.graph)  # 保存到不同的路径下
+
         for i in range(iterations):
             images,labels = mnist.train.next_batch(batch_size)
             data = pre_data(images,labels,batch_size)
             sess.run(train_step,feed_dict={x1:data[0],x2:data[1],y:data[2]})
             if i%10 == 1:
-                loss,acc = sess.run([Loss,accuracy],feed_dict={x1:test_data[0],x2:test_data[1],y:test_data[2]})
+                loss,acc,s = sess.run([Loss,accuracy,merged_summary],feed_dict={x1:test_data[0],x2:test_data[1],y:test_data[2]})
+                writer.add_summary(s, i)
                 print("%5d: accuracy is: %4f , loss is : %4f 。" % (i, acc, loss))
                 image_x.append(i)
                 image_y_acc.append(acc)
@@ -163,10 +179,9 @@ def model():
         plt.xlabel("iteration")
         plt.ylabel("accuracy")
         plt.title("acc_loss_v2")
-        plt.savefig('./save/acc_loss_v2.png')
+        plt.savefig('acc_loss_v2.png')
         plt.show()
         print( '[accuracy,loss]:', sess.run([accuracy,Loss],feed_dict={x1:test_data[0],x2:test_data[1],y:test_data[2]}))
-
 
 if __name__ =="__main__":
     model()
