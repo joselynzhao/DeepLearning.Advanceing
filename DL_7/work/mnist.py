@@ -73,7 +73,6 @@ def pre_data(images,labels,size):
     # print(len(count_list_right),len(count_list_right)*num_each_right)
     # {'9,9': 5, '7,7': 5, '4,4': 5, '0,0': 5, '3,3': 5, '8,8': 5, '5,5': 5, '1,1': 5, '6,6': 5, '2,2': 5}
     '''下面考虑负样本'''
-
     for i in range(10): # 对0-9遍历
         for j in range(i+1,10): #仍对0-9遍历
             for count in range(num_each_nega): #构造这num_each_nega多个样本数据
