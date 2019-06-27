@@ -15,8 +15,8 @@ import  tensorflow as tf
 import numpy as np
 import matplotlib.pyplot as plt
 import tensorflow as tf
-old_v = tf.logging.get_verbosity()
-tf.logging.set_verbosity(tf.logging.ERROR)
+# old_v = tf.logging.get_verbosity()
+# tf.logging.set_verbosity(tf.logging.ERROR)
 import tensorflow.contrib.slim as slim
 
 from tensorflow.python.framework import graph_util
@@ -48,8 +48,8 @@ def pre_data(images,labels,size):
     count_list_nega = {}  # 设计为字典
 
     '''下面考虑正例，每个数字占（size/2）的1/10'''
-    num_each_right = size/2/10  #每个数字创造的样本数
-    num_each_nega = size / 2 / 45
+    num_each_right = size//2//10  #每个数字创造的样本数
+    num_each_nega = size //2 // 45
     for i in range(10):  #对每个数字做遍历
         isbreak = 0
         count =0 #当前样本数为0
@@ -100,8 +100,8 @@ def fully_connected_layer(scope_name,x,W_name,b_name,W_shape,reuse = False):
             scope.reuse_variables()
         fc_W = tf.get_variable(W_name, initializer=tf.truncated_normal(W_shape, stddev=0.1))
         fc_b = tf.get_variable(b_name, initializer=tf.zeros(W_shape[1]))
-        tf.summary.histogram("weights", fc_W)
-        tf.summary.histogram("biases", fc_b)
+        # tf.summary.histogram("weights", fc_W)
+        # tf.summary.histogram("biases", fc_b)
         fc = tf.matmul(x, fc_W) + fc_b
         return fc
 
@@ -115,7 +115,7 @@ def net(x,scope_name='net'):
 
 def model():
     Q = tf.constant([5.0])
-    thresh = 1.7  # 用于判断的距离阈值
+    thresh = 1.5  # 用于判断的距离阈值
     iterations = 1000
     lr = 0.02
     batch_size = 900
@@ -126,12 +126,13 @@ def model():
     # y2 = tf.placeholder(tf.float32, [None, 10], name="y2")
     net1 = net(x1)
     net2 = net(x2)
+    y_ = tf.reshape(y,[-1])
     # tf.summary.histogram("net1", net1)
     # tf.summary.histogram("net2", net2)
     Ew = tf.sqrt(tf.reduce_sum(tf.square(net1 - net2), 1))  #我可以把它理解为计算结果么？
     tf.summary.histogram("Ew", Ew)
-    L1 = 2 * (1 - y) * tf.square(Ew) / Q
-    L2 = 2 * y * tf.exp(-2.77 * Ew / Q) * Q
+    L1 = 2 * (1 - y_) * tf.square(Ew) / Q
+    L2 = 2 * y_ * tf.exp(-2.77 * Ew / Q) * Q
     tf.summary.histogram("L1", L1)
     tf.summary.histogram("L2", L2)
     Loss = tf.reduce_mean(L1 + L2)
