@@ -114,10 +114,10 @@ def net(x,scope_name='net'):
         return fc1
 
 def model():
-    Q = tf.constant([5.0])
+    Q = tf.constant([3.0])
     thresh = 1.5  # 用于判断的距离阈值
-    iterations = 1000
-    lr = 0.02
+    iterations = 20000
+    lr = 0.01
     batch_size = 900
 
     x1 = tf.placeholder(tf.float32, [None, 784], name="x1")
@@ -133,8 +133,8 @@ def model():
     # tf.summary.histogram("Ew", Ew)
     L1 = 2 * (1 - y_) * tf.square(Ew) / Q
     L2 = 2 * y_ * tf.exp(-2.77 * Ew / Q) * Q
-    tf.summary.histogram("L1", L1)
-    tf.summary.histogram("L2", L2)
+    # tf.summary.scalar("L1", L1)
+    # tf.summary.histogram("L2", L2)
     Loss = tf.reduce_mean(L1 + L2)
     tf.summary.scalar("loss",Loss)
 
@@ -178,10 +178,9 @@ def model():
         # plt.plot(image_x, image_y_loss, 'g', label="loss")
         plt.xlabel("iteration")
         plt.ylabel("accuracy")
-        plt.title("acc_loss_v2")
-        plt.savefig('acc_loss_v2.png')
+        plt.title("acc_loss1")
+        plt.savefig('acc_loss1.png')
         plt.show()
         print( '[accuracy,loss]:', sess.run([accuracy,Loss],feed_dict={x1:test_data[0],x2:test_data[1],y:test_data[2]}))
-
 if __name__ =="__main__":
     model()

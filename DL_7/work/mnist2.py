@@ -111,7 +111,7 @@ def fully_connected_layer(scope_name,x,W_name,b_name,W_shape,reuse = False):
 def net(x,scope_name='net'):
     with tf.variable_scope(scope_name,reuse=tf.AUTO_REUSE):
         fc0 = fully_connected_layer("fc1",x,"fc1_w","fc1_b",[784,500])
-        fc0 = tf.nn.relu(fc0)
+        fc0 = tf.nn.sigmoid(fc0)
         fc1 = fully_connected_layer("fc2",fc0,"fc2_w","fc2_b",[500,10])
         fc1 = tf.nn.relu(fc1)
         return fc1
@@ -119,8 +119,8 @@ def net(x,scope_name='net'):
 def model():
     Q = tf.constant([5.0])
     thresh = 2.5  # 用于判断的距离阈值
-    iterations = 6000
-    lr = 0.1
+    iterations = 8000
+    lr = 0.05
     batch_size = 900
 
     x1 = tf.placeholder(tf.float32, [None, 784], name="x1")
@@ -171,8 +171,8 @@ def model():
             data = pre_data(images,labels,batch_size)
             sess.run(train_step,feed_dict={x1:data[0],x2:data[1],y:data[2]})
             if i%10 == 0:
-                loss,acc = sess.run([Loss,accuracy],feed_dict={x1:test_data[0],x2:test_data[1],y:test_data[2]})
-                # writer.add_summary(s, i)
+                loss,acc,s = sess.run([Loss,accuracy,merged_summary],feed_dict={x1:test_data[0],x2:test_data[1],y:test_data[2]})
+                writer.add_summary(s, i)
                 print("%5d: accuracy is: %4f , loss is : %4f 。" % (i, acc, loss))
                 image_x.append(i)
                 image_y_acc.append(acc)
