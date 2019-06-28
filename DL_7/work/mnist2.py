@@ -5,8 +5,8 @@
 @CONTACT:zhaojing17@foxmail.com
 @HOME_PAGE:joselynzhao.top
 @SOFTWERE:PyCharm
-@FILE:mnist.py
-@TIME:2019/6/24 19:53
+@FILE:mnist2.py
+@TIME:2019/6/28 09:33
 @DES:
 '''
 
@@ -18,6 +18,9 @@ import tensorflow as tf
 old_v = tf.logging.get_verbosity()
 tf.logging.set_verbosity(tf.logging.ERROR)
 import tensorflow.contrib.slim as slim
+
+
+import sklearn.metrics as metrics
 
 from tensorflow.python.framework import graph_util
 
@@ -48,8 +51,8 @@ def pre_data(images,labels,size):
     count_list_nega = {}  # 设计为字典
 
     '''下面考虑正例，每个数字占（size/2）的1/10'''
-    num_each_right = size//2//10  #每个数字创造的样本数
-    num_each_nega = size //2 // 45
+    num_each_right = int(size/2/10)  #每个数字创造的样本数
+    num_each_nega = int(size / 2 / 45)
     for i in range(10):  #对每个数字做遍历
         isbreak = 0
         count =0 #当前样本数为0
@@ -100,24 +103,24 @@ def fully_connected_layer(scope_name,x,W_name,b_name,W_shape,reuse = False):
             scope.reuse_variables()
         fc_W = tf.get_variable(W_name, initializer=tf.truncated_normal(W_shape, stddev=0.1))
         fc_b = tf.get_variable(b_name, initializer=tf.zeros(W_shape[1]))
-        # tf.summary.histogram("weights", fc_W)
-        # tf.summary.histogram("biases", fc_b)
+        tf.summary.histogram("weights", fc_W)
+        tf.summary.histogram("biases", fc_b)
         fc = tf.matmul(x, fc_W) + fc_b
         return fc
 
 def net(x,scope_name='net'):
     with tf.variable_scope(scope_name,reuse=tf.AUTO_REUSE):
         fc0 = fully_connected_layer("fc1",x,"fc1_w","fc1_b",[784,500])
-        fc0 = tf.nn.sigmoid(fc0)
+        fc0 = tf.nn.relu(fc0)
         fc1 = fully_connected_layer("fc2",fc0,"fc2_w","fc2_b",[500,10])
         fc1 = tf.nn.relu(fc1)
         return fc1
 
 def model():
     Q = tf.constant([5.0])
-    thresh = 1.5  # 用于判断的距离阈值
-    iterations = 1000
-    lr = 0.02
+    thresh = 2.5  # 用于判断的距离阈值
+    iterations = 6000
+    lr = 0.1
     batch_size = 900
 
     x1 = tf.placeholder(tf.float32, [None, 784], name="x1")
@@ -130,7 +133,7 @@ def model():
     # tf.summary.histogram("net1", net1)
     # tf.summary.histogram("net2", net2)
     Ew = tf.sqrt(tf.reduce_sum(tf.square(net1 - net2), 1))  #我可以把它理解为计算结果么？
-    # tf.summary.histogram("Ew", Ew)
+    tf.summary.histogram("Ew", Ew)
     L1 = 2 * (1 - y_) * tf.square(Ew) / Q
     L2 = 2 * y_ * tf.exp(-2.77 * Ew / Q) * Q
     tf.summary.histogram("L1", L1)
@@ -138,7 +141,7 @@ def model():
     Loss = tf.reduce_mean(L1 + L2)
     tf.summary.scalar("loss",Loss)
 
-    prediction = tf.greater(Ew, thresh)  #这个函数又是个什么鬼啊
+    prediction = tf.greater(Ew, thresh)
     tf.summary.histogram("prediction", tf.cast(prediction,tf.int32))
     # 定义准确率
     correct_prediction = tf.equal(prediction, tf.cast(y_, tf.bool))
@@ -167,20 +170,37 @@ def model():
             images,labels = mnist.train.next_batch(batch_size)
             data = pre_data(images,labels,batch_size)
             sess.run(train_step,feed_dict={x1:data[0],x2:data[1],y:data[2]})
-            if i%10 == 1:
-                loss,acc,s = sess.run([Loss,accuracy,merged_summary],feed_dict={x1:test_data[0],x2:test_data[1],y:test_data[2]})
-                writer.add_summary(s, i)
+            if i%10 == 0:
+                loss,acc = sess.run([Loss,accuracy],feed_dict={x1:test_data[0],x2:test_data[1],y:test_data[2]})
+                # writer.add_summary(s, i)
                 print("%5d: accuracy is: %4f , loss is : %4f 。" % (i, acc, loss))
                 image_x.append(i)
                 image_y_acc.append(acc)
                 image_y_loss.append(loss)
-        plt.plot(image_x, image_y_acc, 'r', label="accuracy")
-        # plt.plot(image_x, image_y_loss, 'g', label="loss")
-        plt.xlabel("iteration")
-        plt.ylabel("accuracy")
-        plt.title("acc_loss_v2")
-        plt.savefig('acc_loss_v2.png')
+        e_w = sess.run(Ew, feed_dict={x1:test_data[0],x2:test_data[1],y:test_data[2]})
+
+        fig = plt.figure()
+        threshs = [0.2, 0.5, 0.7 ,1., 1.3, 1.5, 1.8, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5,5.0]
+        for thresh in threshs:
+            predictions = (e_w > thresh).astype(np.int8)
+            labels = sess.run(y, feed_dict={y:test_data[2]})
+            #     labels = -(y_batch1.argmax(1) == y_batch2.argmax(1)).astype(np.float32) +1
+            precision, recall, th = metrics.precision_recall_curve(labels, predictions)
+            plt.plot(precision, recall, linewidth=1.0,label='thresh='+str(thresh))
+            #plt.annotate("c="+str(c),xy=(0.5,-1+p))
+        plt.plot([0.5,1], [0.5,1], linewidth=1.0,label='equal')
+        plt.title("precision and recall curve")
+        plt.legend()
+        plt.xlabel("precision")
+        plt.ylabel('recall')
         plt.show()
+        # plt.plot(image_x, image_y_acc, 'r', label="accuracy")
+        # plt.plot(image_x, image_y_loss, 'g', label="loss")
+        # plt.xlabel("iteration")
+        # plt.ylabel("accuracy")
+        # plt.title("acc_loss_v2")
+        # plt.savefig('acc_loss_v2.png')
+        # plt.show()
         print( '[accuracy,loss]:', sess.run([accuracy,Loss],feed_dict={x1:test_data[0],x2:test_data[1],y:test_data[2]}))
 
 if __name__ =="__main__":
