@@ -68,13 +68,13 @@ def pre_data(images,labels,size):
                 label.append([0])
                 count+=1
                 if count>=num_each_right:
-                    count_list_right["%d,%d"%(i,i)]=count
+                    count_list_right["(%d,%d)"%(i,i)]=count
                     isbreak = 1
                     break
                     #跳出两层for循环
     # print(count_list_right)
     # print(len(count_list_right),len(count_list_right)*num_each_right)
-    # {'9,9': 5, '7,7': 5, '4,4': 5, '0,0': 5, '3,3': 5, '8,8': 5, '5,5': 5, '1,1': 5, '6,6': 5, '2,2': 5}
+
     '''下面考虑负样本'''
     for i in range(10): # 对0-9遍历
         for j in range(i+1,10): #仍对0-9遍历
@@ -82,7 +82,7 @@ def pre_data(images,labels,size):
                 image1.append(from_0_to_9[i][count])
                 image2.append(from_0_to_9[j][count])
                 label.append([1])
-            count_list_nega["%d,%d"%(i,j)]=num_each_nega
+            count_list_nega["(%d,%d)"%(i,j)]=num_each_nega
 
     # print(count_list_nega)
     # print(len(count_list_nega), len(count_list_nega)*num_each_nega)
@@ -92,7 +92,7 @@ def pre_data(images,labels,size):
     data.append(image1)
     data.append(image2)
     data.append(label)
-    return data
+    return data,count_list_right,count_list_nega
 
 
 ''' 下面设计网络部分'''
@@ -118,7 +118,7 @@ def net(x,scope_name='net'):
 
 def model():
     Q = tf.constant([5.0])
-    thresh = 2.5  # 用于判断的距离阈值
+    thresh = 2.5
     iterations = 8000
     lr = 0.05
     batch_size = 900
@@ -150,17 +150,16 @@ def model():
 
     # 采用Adam作为优化器
     train_step = tf.train.GradientDescentOptimizer(lr).minimize(Loss)
-    # # 定义保存器
-    # saver = tf.train.Saver(max_to_keep=4)
+
     test_images = mnist.test.images
     test_labels = mnist.test.labels
-    test_data = pre_data(test_images,test_labels,9000)
-
+    test_data,_,_ = pre_data(test_images,test_labels,9000)
+    
     image_x = []
     image_y_acc = []
     image_y_loss = []
 
-    with tf.Session() as sess:  #这个session需要关闭么？
+    with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
         # tf.summary.image("input", lenet.x, 3)
         merged_summary = tf.summary.merge_all()
@@ -168,7 +167,7 @@ def model():
 
         for i in range(iterations):
             images,labels = mnist.train.next_batch(batch_size)
-            data = pre_data(images,labels,batch_size)
+            data,_,_ = pre_data(images,labels,batch_size)
             sess.run(train_step,feed_dict={x1:data[0],x2:data[1],y:data[2]})
             if i%10 == 0:
                 loss,acc,s = sess.run([Loss,accuracy,merged_summary],feed_dict={x1:test_data[0],x2:test_data[1],y:test_data[2]})
@@ -179,28 +178,18 @@ def model():
                 image_y_loss.append(loss)
         e_w = sess.run(Ew, feed_dict={x1:test_data[0],x2:test_data[1],y:test_data[2]})
 
-        fig = plt.figure()
         threshs = [0.2, 0.5, 0.7 ,1., 1.3, 1.5, 1.8, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5,5.0]
         for thresh in threshs:
             predictions = (e_w > thresh).astype(np.int8)
             labels = sess.run(y, feed_dict={y:test_data[2]})
-            #     labels = -(y_batch1.argmax(1) == y_batch2.argmax(1)).astype(np.float32) +1
             precision, recall, th = metrics.precision_recall_curve(labels, predictions)
             plt.plot(precision, recall, linewidth=1.0,label='thresh='+str(thresh))
-            #plt.annotate("c="+str(c),xy=(0.5,-1+p))
         plt.plot([0.5,1], [0.5,1], linewidth=1.0,label='equal')
         plt.title("precision and recall curve")
         plt.legend()
         plt.xlabel("precision")
         plt.ylabel('recall')
         plt.show()
-        # plt.plot(image_x, image_y_acc, 'r', label="accuracy")
-        # plt.plot(image_x, image_y_loss, 'g', label="loss")
-        # plt.xlabel("iteration")
-        # plt.ylabel("accuracy")
-        # plt.title("acc_loss_v2")
-        # plt.savefig('acc_loss_v2.png')
-        # plt.show()
         print( '[accuracy,loss]:', sess.run([accuracy,Loss],feed_dict={x1:test_data[0],x2:test_data[1],y:test_data[2]}))
 
 if __name__ =="__main__":
